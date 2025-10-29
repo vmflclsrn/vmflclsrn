@@ -1,0 +1,84 @@
+<!doctype html>
+<div style='margin-top:10px;display:flex;gap:8px;align-items:center'>
+<button class='secondary' data-id='${t.id}'>답글</button>
+<button class='secondary' data-del='${t.id}'>삭제</button>
+</div>
+`;
+// reply & delete handlers
+div.querySelector("button[data-id]")?.addEventListener('click', ()=>{
+const reply = prompt('답글을 입력하세요 (간단 데모):');
+if(reply){
+t.replies = t.replies||[]; t.replies.push({author:'간단데모', content:reply, created:Date.now()});
+saveThreads(getThreads().map(x=> x.id===t.id? t:x)); renderThreads();
+}
+});
+div.querySelector("button[data-del]")?.addEventListener('click', ()=>{
+if(confirm('정말 삭제할까요?')){
+const newT = getThreads().filter(x=> x.id!==t.id); saveThreads(newT); renderThreads();
+}
+});
+
+
+// show replies if exist
+if(t.replies && t.replies.length){
+const rwrap = document.createElement('div'); rwrap.style.marginTop='10px'; rwrap.style.paddingTop='10px'; rwrap.style.borderTop='1px dashed rgba(255,255,255,0.02)';
+t.replies.forEach(r=>{
+const rdiv = document.createElement('div'); rdiv.style.marginTop='8px'; rdiv.innerHTML = `<div style='font-weight:700'>${escapeHtml(r.author||'익명')}</div><div class='muted' style='font-size:13px'>${new Date(r.created).toLocaleString()}</div><div style='margin-top:6px'>${nl2br(escapeHtml(r.content))}</div>`;
+rwrap.appendChild(rdiv);
+});
+div.appendChild(rwrap);
+}
+
+
+area.appendChild(div);
+});
+}
+
+
+// events & actions
+function addThread(author, content){
+const threads = getThreads();
+const id = 't_'+Date.now()+'_'+(Math.random()*1000|0);
+const title = content.split('\n')[0].slice(0,60);
+threads.push({id, author, content, title, coin: activeCoin, created: Date.now(), replies: []});
+saveThreads(threads); renderThreads();
+}
+
+
+function escapeHtml(str){ return String(str||'').replace(/[&<>"']/g, function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; }); }
+function nl2br(s){ return s.replace(/\n/g,'<br>'); }
+
+
+// initial
+loadOrInit(); renderCoinList(); renderThreads();
+
+
+// bindings
+$('search').addEventListener('input', e=> renderCoinList(e.target.value));
+$('submit').addEventListener('click', ()=>{
+const author = $('author').value.trim()||'익명';
+const content = $('content').value.trim();
+if(!content){ alert('내용을 입력하세요.'); return; }
+if(content.length>1000){ alert('내용이 너무 깁니다. 1000자 이하로 작성해주세요.'); return; }
+addThread(author, content);
+$('content').value='';
+});
+$('clear').addEventListener('click', ()=>{ $('author').value=''; $('content').value=''; });
+$('reset').addEventListener('click', ()=>{ if(confirm('데모 데이터를 초기화하시겠습니까?')){ localStorage.clear(); loadOrInit(); renderCoinList(); renderThreads(); $('composerCoin').innerText='전체'; activeCoin=null; } });
+
+
+// new-thread quick focus
+$('new-thread').addEventListener('click', ()=>{ window.scrollTo({top:document.body.scrollHeight, behavior:'smooth'}); $('content').focus(); });
+
+
+// small UX: set composer coin label
+$('composerCoin').innerText = '전체';
+
+
+// accessibility: allow Ctrl+Enter to submit
+$('content').addEventListener('keydown', (e)=>{ if((e.ctrlKey||e.metaKey) && e.key==='Enter'){ $('submit').click(); } });
+
+
+</script>
+</body>
+</html>
