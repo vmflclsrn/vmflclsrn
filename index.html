@@ -1,84 +1,51 @@
 <!doctype html>
-<div style='margin-top:10px;display:flex;gap:8px;align-items:center'>
-<button class='secondary' data-id='${t.id}'>답글</button>
-<button class='secondary' data-del='${t.id}'>삭제</button>
-</div>
-`;
-// reply & delete handlers
-div.querySelector("button[data-id]")?.addEventListener('click', ()=>{
-const reply = prompt('답글을 입력하세요 (간단 데모):');
-if(reply){
-t.replies = t.replies||[]; t.replies.push({author:'간단데모', content:reply, created:Date.now()});
-saveThreads(getThreads().map(x=> x.id===t.id? t:x)); renderThreads();
-}
-});
-div.querySelector("button[data-del]")?.addEventListener('click', ()=>{
-if(confirm('정말 삭제할까요?')){
-const newT = getThreads().filter(x=> x.id!==t.id); saveThreads(newT); renderThreads();
-}
-});
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>토큰토크 — 종목별 암호화폐 토론</title>
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --muted:#9aa4b2; --accent:#7c3aed; --glass: rgba(255,255,255,0.03);
+      --radius:12px; --maxw:1100px; --gap:16px;
+    }
+    *{box-sizing:border-box}
+    body{font-family:Inter,system-ui,Apple SD Gothic Neo,Segoe UI,Roboto,'Nanum Gothic',sans-serif; margin:0; background:linear-gradient(180deg,#071028 0%, #071a2b 100%); color:#e6eef8; -webkit-font-smoothing:antialiased}
+    .container{max-width:var(--maxw); margin:28px auto; padding:20px}
+    header{display:flex;gap:12px;align-items:center;justify-content:space-between}
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#06b6d4);display:flex;align-items:center;justify-content:center;font-weight:700}
+    h1{font-size:18px;margin:0}
+    p.lead{margin:0;color:var(--muted);font-size:13px}
 
+    .controls{display:flex;gap:10px;align-items:center}
+    .search{background:var(--glass);border:1px solid rgba(255,255,255,0.03);padding:8px 12px;border-radius:10px;min-width:260px;display:flex;gap:8px;align-items:center}
+    .search input{background:transparent;border:0;color:inherit;outline:none;width:200px}
+    select,button{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 10px;border-radius:10px;color:inherit}
+    .btn-primary{background:linear-gradient(90deg,var(--accent),#06b6d4);border:0;padding:10px 14px;color:#071027;font-weight:600}
 
-// show replies if exist
-if(t.replies && t.replies.length){
-const rwrap = document.createElement('div'); rwrap.style.marginTop='10px'; rwrap.style.paddingTop='10px'; rwrap.style.borderTop='1px dashed rgba(255,255,255,0.02)';
-t.replies.forEach(r=>{
-const rdiv = document.createElement('div'); rdiv.style.marginTop='8px'; rdiv.innerHTML = `<div style='font-weight:700'>${escapeHtml(r.author||'익명')}</div><div class='muted' style='font-size:13px'>${new Date(r.created).toLocaleString()}</div><div style='margin-top:6px'>${nl2br(escapeHtml(r.content))}</div>`;
-rwrap.appendChild(rdiv);
-});
-div.appendChild(rwrap);
-}
+    .layout{display:grid;grid-template-columns:300px 1fr;gap:var(--gap);margin-top:20px}
+    aside{background:var(--card);padding:16px;border-radius:var(--radius);height:fit-content}
+    .asset-list{display:flex;flex-direction:column;gap:8px}
+    .asset{padding:8px;border-radius:8px;display:flex;align-items:center;gap:10px;cursor:pointer}
+    .asset:hover{background:rgba(255,255,255,0.02)}
+    .asset .badge{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#0ea5a4,#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:700}
+    .filters{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);padding:14px;border-radius:12px}
 
+    main{display:flex;flex-direction:column;gap:12px}
+    .thread{display:flex;gap:12px;padding:12px;border-radius:10px;align-items:flex-start;background:rgba(255,255,255,0.02)}
+    .votes{width:56px;text-align:center}
+    .votes button{display:block;margin:6px auto;padding:6px;border-radius:8px;border:0;background:rgba(255,255,255,0.03);color:inherit}
+    .thread .meta{color:var(--muted);font-size:13px}
+    .tags{display:flex;gap:6px;flex-wrap:wrap}
+    .tag{font-size:12px;padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.03)}
 
-area.appendChild(div);
-});
-}
+    .thread .title{font-weight:700;margin:0}
+    .new-post{display:flex;gap:10px;align-items:center}
+    .avatar{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#ef9a9a,#f48fb1);display:flex;align-items:center;justify-content:center;font-weight:700}
+    footer{margin-top:20px;color:var(--muted);font-size:13px}
 
-
-// events & actions
-function addThread(author, content){
-const threads = getThreads();
-const id = 't_'+Date.now()+'_'+(Math.random()*1000|0);
-const title = content.split('\n')[0].slice(0,60);
-threads.push({id, author, content, title, coin: activeCoin, created: Date.now(), replies: []});
-saveThreads(threads); renderThreads();
-}
-
-
-function escapeHtml(str){ return String(str||'').replace(/[&<>"']/g, function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; }); }
-function nl2br(s){ return s.replace(/\n/g,'<br>'); }
-
-
-// initial
-loadOrInit(); renderCoinList(); renderThreads();
-
-
-// bindings
-$('search').addEventListener('input', e=> renderCoinList(e.target.value));
-$('submit').addEventListener('click', ()=>{
-const author = $('author').value.trim()||'익명';
-const content = $('content').value.trim();
-if(!content){ alert('내용을 입력하세요.'); return; }
-if(content.length>1000){ alert('내용이 너무 깁니다. 1000자 이하로 작성해주세요.'); return; }
-addThread(author, content);
-$('content').value='';
-});
-$('clear').addEventListener('click', ()=>{ $('author').value=''; $('content').value=''; });
-$('reset').addEventListener('click', ()=>{ if(confirm('데모 데이터를 초기화하시겠습니까?')){ localStorage.clear(); loadOrInit(); renderCoinList(); renderThreads(); $('composerCoin').innerText='전체'; activeCoin=null; } });
-
-
-// new-thread quick focus
-$('new-thread').addEventListener('click', ()=>{ window.scrollTo({top:document.body.scrollHeight, behavior:'smooth'}); $('content').focus(); });
-
-
-// small UX: set composer coin label
-$('composerCoin').innerText = '전체';
-
-
-// accessibility: allow Ctrl+Enter to submit
-$('content').addEventListener('keydown', (e)=>{ if((e.ctrlKey||e.metaKey) && e.key==='Enter'){ $('submit').click(); } });
-
-
-</script>
-</body>
-</html>
+    /* modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;padding:20px}
+    .modal{background:var(--card);padding:18px;border-radius:12px;max-width:680px;
