@@ -3,49 +3,310 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>토큰토크 — 종목별 암호화폐 토론</title>
+  <title>CoinTalk — 코인별 토론 커뮤니티</title>
+  <meta name="description" content="20~30대 투자자를 위한 암호화폐 종목별 토론 사이트 샘플" />
   <style>
     :root{
-      --bg:#0f1724; --card:#0b1220; --muted:#9aa4b2; --accent:#7c3aed; --glass: rgba(255,255,255,0.03);
-      --radius:12px; --maxw:1100px; --gap:16px;
+      --bg:#0f1724; --card:#0b1320; --muted:#9aa4b2; --accent:#7c3aed;
+      --glass: rgba(255,255,255,0.03);
+      --glass-2: rgba(255,255,255,0.02);
+      --success: #16a34a;
+      color-scheme: dark;
     }
     *{box-sizing:border-box}
-    body{font-family:Inter,system-ui,Apple SD Gothic Neo,Segoe UI,Roboto,'Nanum Gothic',sans-serif; margin:0; background:linear-gradient(180deg,#071028 0%, #071a2b 100%); color:#e6eef8; -webkit-font-smoothing:antialiased}
-    .container{max-width:var(--maxw); margin:28px auto; padding:20px}
-    header{display:flex;gap:12px;align-items:center;justify-content:space-between}
-    .brand{display:flex;align-items:center;gap:12px}
-    .logo{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#06b6d4);display:flex;align-items:center;justify-content:center;font-weight:700}
-    h1{font-size:18px;margin:0}
+    html,body{height:100%;margin:0;font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:linear-gradient(180deg,#071027 0%,#0b1220 100%); color:#e6eef8}
+    .app{display:grid;grid-template-columns:260px 1fr;gap:20px;padding:24px;max-width:1200px;margin:0 auto}
+    header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#4c1d95);display:flex;align-items:center;justify-content:center;font-weight:700}
+    h1{margin:0;font-size:18px}
     p.lead{margin:0;color:var(--muted);font-size:13px}
 
-    .controls{display:flex;gap:10px;align-items:center}
-    .search{background:var(--glass);border:1px solid rgba(255,255,255,0.03);padding:8px 12px;border-radius:10px;min-width:260px;display:flex;gap:8px;align-items:center}
-    .search input{background:transparent;border:0;color:inherit;outline:none;width:200px}
-    select,button{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 10px;border-radius:10px;color:inherit}
-    .btn-primary{background:linear-gradient(90deg,var(--accent),#06b6d4);border:0;padding:10px 14px;color:#071027;font-weight:600}
+    /* Sidebar */
+    .sidebar{background:linear-gradient(180deg,var(--glass),var(--glass-2));border-radius:12px;padding:14px;height:calc(100vh - 140px);overflow:auto}
+    .search{display:flex;gap:8px;margin-bottom:12px}
+    .search input{flex:1;padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+    .coin-list{display:flex;flex-direction:column;gap:8px}
+    .coin{padding:10px;border-radius:8px;display:flex;align-items:center;gap:10px;cursor:pointer;border:1px solid transparent}
+    .coin:hover{background:rgba(255,255,255,0.02)}
+    .coin.active{background:linear-gradient(90deg,rgba(124,58,237,0.14),rgba(76,29,149,0.08));border:1px solid rgba(124,58,237,0.18)}
+    .coin .ticker{font-weight:700}
+    .coin .small{font-size:12px;color:var(--muted)}
 
-    .layout{display:grid;grid-template-columns:300px 1fr;gap:var(--gap);margin-top:20px}
-    aside{background:var(--card);padding:16px;border-radius:var(--radius);height:fit-content}
-    .asset-list{display:flex;flex-direction:column;gap:8px}
-    .asset{padding:8px;border-radius:8px;display:flex;align-items:center;gap:10px;cursor:pointer}
-    .asset:hover{background:rgba(255,255,255,0.02)}
-    .asset .badge{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#0ea5a4,#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:700}
-    .filters{display:flex;flex-direction:column;gap:8px;margin-top:12px}
-    .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);padding:14px;border-radius:12px}
+    /* Main */
+    .main{display:flex;flex-direction:column;gap:12px}
+    .card{background:var(--card);padding:16px;border-radius:12px;border:1px solid rgba(255,255,255,0.02)}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .controls{display:flex;gap:8px}
+    .btn{background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01));padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);cursor:pointer}
+    .btn.primary{background:linear-gradient(90deg,var(--accent),#5b21b6);box-shadow:0 6px 18px rgba(124,58,237,0.18)}
+    .compose{display:flex;gap:10px;align-items:flex-start}
+    .compose textarea{flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;min-height:72px;color:inherit}
+    .compose .meta{width:200px}
 
-    main{display:flex;flex-direction:column;gap:12px}
-    .thread{display:flex;gap:12px;padding:12px;border-radius:10px;align-items:flex-start;background:rgba(255,255,255,0.02)}
-    .votes{width:56px;text-align:center}
-    .votes button{display:block;margin:6px auto;padding:6px;border-radius:8px;border:0;background:rgba(255,255,255,0.03);color:inherit}
-    .thread .meta{color:var(--muted);font-size:13px}
-    .tags{display:flex;gap:6px;flex-wrap:wrap}
-    .tag{font-size:12px;padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.03)}
+    /* Thread list */
+    .threads{display:flex;flex-direction:column;gap:10px}
+    .thread{display:flex;gap:12px;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.02)}
+    .avatar{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#334155,#0ea5a3);display:flex;align-items:center;justify-content:center;font-weight:700}
+    .thread .meta{flex:1}
+    .thread h3{margin:0;font-size:15px}
+    .thread p{margin:6px 0 0;color:var(--muted);font-size:13px}
+    .actions{display:flex;gap:8px;align-items:center}
+    .pill{padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.02);font-size:12px}
 
-    .thread .title{font-weight:700;margin:0}
-    .new-post{display:flex;gap:10px;align-items:center}
-    .avatar{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#ef9a9a,#f48fb1);display:flex;align-items:center;justify-content:center;font-weight:700}
-    footer{margin-top:20px;color:var(--muted);font-size:13px}
+    /* Post modal / detail */
+    .post-detail{position:fixed;right:20px;bottom:20px;width:360px;max-height:70vh;overflow:auto}
+    .hidden{display:none}
 
-    /* modal */
-    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;padding:20px}
-    .modal{background:var(--card);padding:18px;border-radius:12px;max-width:680px;
+    footer{grid-column:1/-1;text-align:center;color:var(--muted);font-size:13px;margin-top:8px}
+
+    /* Responsive */
+    @media (max-width:900px){.app{grid-template-columns:1fr;padding:12px}.sidebar{height:auto}.post-detail{position:static;width:100%}}
+  </style>
+</head>
+<body>
+  <div class="app" role="application" aria-label="CoinTalk Forum">
+    <header>
+      <div class="brand">
+        <div class="logo">CT</div>
+        <div>
+          <h1>CoinTalk</h1>
+          <p class="lead">코인별 실시간 토론 · 20~30대 투자자 맞춤 UI</p>
+        </div>
+      </div>
+      <div class="controls">
+        <div class="btn" id="nickBtn">닉네임 설정</div>
+        <div class="btn primary" id="newThreadBtn">새 토론 작성</div>
+      </div>
+    </header>
+
+    <!-- Sidebar: coin list -->
+    <aside class="sidebar" aria-label="코인 목록">
+      <div class="search">
+        <input id="coinSearch" placeholder="코인 검색 (예: BTC, ETH, SOL)" aria-label="검색" />
+        <div class="btn" id="filterBtn">필터</div>
+      </div>
+      <div class="coin-list" id="coinList" role="list"></div>
+      <hr style="margin:12px 0;border-color:rgba(255,255,255,0.03)" />
+      <div style="font-size:12px;color:var(--muted)">Tip: 오른쪽 상단 '새 토론 작성'으로 코인별 토론을 시작하세요.</div>
+    </aside>
+
+    <!-- Main: threads for selected coin -->
+    <main class="main">
+      <section class="card">
+        <div class="topbar">
+          <div>
+            <strong id="selectedCoinName">선택된 코인 없음</strong>
+            <div class="small" id="selectedCoinTag">토론을 보려면 코인을 선택하세요</div>
+          </div>
+          <div class="small" id="stats">토론 0개 · 참여자 0명</div>
+        </div>
+      </section>
+
+      <section class="card" id="composeCard" hidden>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="font-weight:700">새 토론 만들기</div>
+          <div style="font-size:12px;color:var(--muted)">작성자: <span id="currentNick">익명</span></div>
+        </div>
+        <div class="compose">
+          <textarea id="threadTitle" placeholder="토론 제목을 입력하세요 (예: BTC 단기 반등 가능성?)"></textarea>
+          <div class="meta">
+            <label class="small">태그</label>
+            <input id="threadTags" placeholder="분석/뉴스/질문" style="width:100%;padding:8px;border-radius:8px;margin-top:6px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit" />
+            <div style="margin-top:8px;display:flex;gap:8px;justify-content:flex-end">
+              <div class="btn" id="cancelThread">취소</div>
+              <div class="btn primary" id="submitThread">등록</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div style="font-weight:700">토론 목록</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="threadSearch" placeholder="제목 · 내용 검색" style="padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit" />
+            <div class="btn" id="sortBtn">최신순</div>
+          </div>
+        </div>
+
+        <div class="threads" id="threads"></div>
+      </section>
+
+      <div id="postDetailWrapper" class="post-detail hidden card" aria-hidden="true"></div>
+
+      <footer>샘플 데모 — 저장은 브라우저 localStorage에 보관됩니다 · 더 원하는 기능이 있나요?</footer>
+    </main>
+  </div>
+
+  <script>
+    /* ---------- 초기 데이터 ---------- */
+    const sampleCoins = [
+      {id:'BTC', name:'Bitcoin', desc:'시가총액 1위'},
+      {id:'ETH', name:'Ethereum', desc:'스마트 컨트랙트 플랫폼'},
+      {id:'SOL', name:'Solana', desc:'고성능 블록체인'},
+      {id:'ADA', name:'Cardano', desc:'연구 중심 플랫폼'},
+      {id:'XRP', name:'XRP', desc:'빠른 결제 네트워크'}
+    ];
+
+    /* 로컬 상태 */
+    let coins = [];
+    let threads = {}; // {coinId: [thread,...]}
+    let selectedCoin = null;
+    let currentNick = localStorage.getItem('ct_nick') || '익명';
+
+    /* ---------- 유틸 ---------- */
+    const $ = (sel)=>document.querySelector(sel);
+    const $all = (sel)=>document.querySelectorAll(sel);
+
+    function saveAll(){
+      localStorage.setItem('ct_threads', JSON.stringify(threads));
+      localStorage.setItem('ct_coins', JSON.stringify(coins));
+    }
+
+    function loadAll(){
+      coins = JSON.parse(localStorage.getItem('ct_coins')) || sampleCoins;
+      threads = JSON.parse(localStorage.getItem('ct_threads')) || {};
+    }
+
+    /* ---------- 렌더링 ---------- */
+    function renderCoinList(filter=''){
+      const list = document.getElementById('coinList'); list.innerHTML='';
+      coins.filter(c=> (c.id+c.name+c.desc).toLowerCase().includes(filter.toLowerCase()) )
+        .forEach(c=>{
+          const el = document.createElement('div'); el.className='coin'; el.role='listitem';
+          if(selectedCoin && selectedCoin.id===c.id) el.classList.add('active');
+          el.innerHTML = `<div style="width:44px;height:36px;border-radius:8px;background:linear-gradient(135deg,rgba(124,58,237,0.12),rgba(76,29,149,0.08));display:flex;align-items:center;justify-content:center;font-weight:700">${c.id}</div>
+                          <div><div class="ticker">${c.name} <span style="font-weight:500;color:var(--muted);font-size:13px">${c.id}</span></div>
+                          <div class="small">${c.desc}</div></div>`;
+          el.onclick = ()=>{ selectedCoin=c; renderSelectedCoin(); renderThreads(); renderCoinList($('#coinSearch').value) };
+          list.appendChild(el);
+        });
+    }
+
+    function renderSelectedCoin(){
+      if(!selectedCoin){
+        $('#selectedCoinName').innerText='선택된 코인 없음';
+        $('#selectedCoinTag').innerText='토론을 보려면 코인을 선택하세요';
+        $('#stats').innerText='토론 0개 · 참여자 0명';
+        $('#composeCard').hidden = true;
+        return;
+      }
+      $('#selectedCoinName').innerText = `${selectedCoin.name} · ${selectedCoin.id}`;
+      $('#selectedCoinTag').innerText = selectedCoin.desc;
+      $('#composeCard').hidden = false;
+      const t = (threads[selectedCoin.id]||[]);
+      const participants = new Set(t.flatMap(th=>[th.author, ...(th.replies||[]).map(r=>r.author)])).size;
+      $('#stats').innerText = `토론 ${t.length}개 · 참여자 ${participants}명`;
+    }
+
+    function renderThreads(query=''){
+      const wrap = $('#threads'); wrap.innerHTML='';
+      if(!selectedCoin) return;
+      let list = (threads[selectedCoin.id]||[]).slice();
+      if(query) list = list.filter(th=> (th.title+th.content).toLowerCase().includes(query.toLowerCase()));
+      if(list.length===0){ wrap.innerHTML = '<div style="color:var(--muted)">토론이 없습니다 — 새 토론을 등록해보세요.</div>'; return }
+      list.forEach(th=>{
+        const el = document.createElement('div'); el.className='thread';
+        el.innerHTML = `<div class="avatar">${(th.author||'익명').slice(0,1)}</div>
+                        <div class="meta">
+                          <h3>${th.title}</h3>
+                          <p>${th.excerpt||th.content.slice(0,180)}</p>
+                          <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+                            <div class="pill">${th.tags||'일반'}</div>
+                            <div class="small">작성자: ${th.author||'익명'}</div>
+                            <div class="small">${new Date(th.created).toLocaleString()}</div>
+                          </div>
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+                          <div class="actions"><div class="btn" data-id="${th.id}" data-act="open">열기</div><div class="btn" data-id="${th.id}" data-act="like">❤ ${th.likes||0}</div></div>
+                          <div style="font-size:12px;color:var(--muted)">${(th.replies||[]).length}개의 댓글</div>
+                        </div>`;
+        wrap.appendChild(el);
+      });
+      // action delegation
+      wrap.querySelectorAll('[data-act]').forEach(btn=>btn.onclick = (e)=>{
+        const id = btn.dataset.id; const act = btn.dataset.act;
+        if(act==='open') openThreadDetail(id);
+        if(act==='like') toggleLike(id);
+      });
+    }
+
+    function openThreadDetail(id){
+      const th = threads[selectedCoin.id].find(t=>t.id===id); if(!th) return;
+      const box = $('#postDetailWrapper'); box.innerHTML=''; box.classList.remove('hidden'); box.setAttribute('aria-hidden','false');
+      const el = document.createElement('div'); el.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div><strong>${th.title}</strong><div class="small">작성자: ${th.author||'익명'} · ${new Date(th.created).toLocaleString()}</div></div><div><div class="btn" id="closeDetail">닫기</div></div></div>
+        <div style="padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.02);margin-bottom:8px">${escapeHtml(th.content)}</div>
+        <div id="replies"><strong>댓글 (${(th.replies||[]).length})</strong></div>
+        <div style="margin-top:10px"><textarea id="replyContent" placeholder="댓글을 입력하세요" style="width:100%;min-height:72px;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit"></textarea>
+        <div style="display:flex;justify-content:flex-end;margin-top:8px"><div class="btn" id="postReply">댓글 등록</div></div></div>`;
+      box.appendChild(el);
+      renderReplies(th);
+      $('#closeDetail').onclick = ()=>{ box.classList.add('hidden'); box.setAttribute('aria-hidden','true') };
+      $('#postReply').onclick = ()=>{
+        const text = $('#replyContent').value.trim(); if(!text) return alert('댓글을 입력하세요');
+        const reply = {id: 'r'+Date.now(), author: currentNick, content: text, created: Date.now()};
+        th.replies = th.replies||[]; th.replies.push(reply); saveAll(); renderReplies(th); renderThreads($('#threadSearch').value); renderSelectedCoin();
+        $('#replyContent').value='';
+      }
+    }
+
+    function renderReplies(th){
+      const wrap = $('#replies'); wrap.innerHTML='';
+      (th.replies||[]).forEach(r=>{
+        const el = document.createElement('div'); el.style.margin='8px 0'; el.innerHTML = `<div style="display:flex;gap:8px"><div style="width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#2563eb,#9333ea);display:flex;align-items:center;justify-content:center">${(r.author||'익명').slice(0,1)}</div><div><div style="font-weight:600">${r.author||'익명'} <span style="font-size:12px;color:var(--muted);font-weight:400">${new Date(r.created).toLocaleString()}</span></div><div style="color:var(--muted);margin-top:4px">${escapeHtml(r.content)}</div></div></div>`;
+        wrap.appendChild(el);
+      });
+      wrap.querySelectorAll('div').forEach(()=>{});
+    }
+
+    function toggleLike(threadId){
+      const th = threads[selectedCoin.id].find(t=>t.id===threadId); if(!th) return; th.likes = (th.likes||0)+1; saveAll(); renderThreads($('#threadSearch').value);
+    }
+
+    /* ---------- forms / events ---------- */
+    document.getElementById('coinSearch').addEventListener('input', (e)=>renderCoinList(e.target.value));
+    document.getElementById('threadSearch').addEventListener('input', (e)=>renderThreads(e.target.value));
+
+    $('#newThreadBtn').onclick = ()=>{
+      if(!selectedCoin) return alert('먼저 사이드바에서 코인을 선택하세요.');
+      $('#composeCard').hidden = false; window.scrollTo({top:0,behavior:'smooth'});
+    }
+    $('#cancelThread').onclick = ()=>{ $('#composeCard').hidden = true }
+    $('#submitThread').onclick = ()=>{
+      const title = $('#threadTitle').value.trim(); const tags = $('#threadTags').value.trim();
+      if(!title) return alert('제목을 입력하세요');
+      const th = {id:'t'+Date.now(), title, content:'', excerpt:'', tags, author:currentNick, created:Date.now(), replies:[], likes:0};
+      // take first 300 chars from threadTitle as content if user pasted newlines
+      th.content = title; th.excerpt = title.length>180? title.slice(0,180)+'...': title;
+      threads[selectedCoin.id] = threads[selectedCoin.id]||[]; threads[selectedCoin.id].unshift(th);
+      saveAll(); renderThreads(); renderSelectedCoin(); $('#composeCard').hidden=true; $('#threadTitle').value=''; $('#threadTags').value='';
+    }
+
+    $('#nickBtn').onclick = ()=>{
+      const nick = prompt('사용하실 닉네임을 입력하세요 (공개) 현재: '+currentNick, currentNick);
+      if(nick!==null){ currentNick = nick.trim()||'익명'; localStorage.setItem('ct_nick', currentNick); $('#currentNick').innerText = currentNick }
+    }
+
+    $('#sortBtn').onclick = ()=>{ alert('정렬 기능은 데모 버전에서 기본 최신순으로 동작합니다. 원하시면 추가 구현해드릴게요!') }
+
+    /* ---------- helpers ---------- */
+    function escapeHtml(str){ if(!str && str!==0) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>') }
+
+    /* ---------- 초기 실행 ---------- */
+    loadAll(); renderCoinList(); renderSelectedCoin(); renderThreads(); $('#currentNick').innerText = currentNick;
+
+    // if no threads data, seed little demo threads
+    if(!localStorage.getItem('ct_threads')){
+      threads = {
+        BTC:[{id:'t1',title:'BTC 단기 반등 가능성?',content:'현재 비트코인 차트에서... (샘플 내용)',excerpt:'현재 비트코인 차트에서... (샘플)',tags:'분석',author:'Alex',created:Date.now()-1000*60*60*24,replies:[{id:'r1',author:'Sam',content:'저는 단기 조정 가능성도 있다고 봅니다',created:Date.now()-1000*60*60}],likes:4}],
+        ETH:[{id:'t2',title:'ETH 2.0 업데이트 영향은?',content:'머지 이후의 생태계 변화에 대해...',excerpt:'머지 이후의 생태계 변화에 대해...',tags:'뉴스',author:'Ny',created:Date.now()-1000*60*60*24*2,replies:[],likes:2}]
+      };
+      saveAll(); renderThreads(); renderSelectedCoin();
+    }
+
+    // accessibility: close detail with Esc
+    document.addEventListener('keydown', (e)=>{ if(e.key==='Escape'){ const box = $('#postDetailWrapper'); box.classList.add('hidden'); box.setAttribute('aria-hidden','true') } });
+  </script>
+</body>
+</html>
